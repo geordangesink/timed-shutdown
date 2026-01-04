@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timed Shutdown</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 550px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #667eea;
+    }
+
+    .status-section {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .status-active {
+      background: #4caf50;
+      color: white;
+    }
+
+    .status-inactive {
+      background: #f44336;
+      color: white;
+    }
+
+    .status-info {
+      color: #666;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    input[type="time"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+
+    input[type="time"]:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .days-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .day-checkbox {
+      display: none;
+    }
+
+    .day-label {
+      flex: 1;
+      min-width: 80px;
+      padding: 10px;
+      text-align: center;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+
+    .day-checkbox:checked + .day-label {
+      background: #667eea;
+      color: white;
+      border-color: #667eea;
+    }
+
+    .reminders-section {
+      margin-top: 25px;
+    }
+
+    .reminder-input {
+      margin-bottom: 10px;
+    }
+
+    .reminder-input input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-activate {
+      background: #4caf50;
+      color: white;
+    }
+
+    .btn-activate:hover:not(:disabled) {
+      background: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-deactivate {
+      background: #f44336;
+      color: white;
+    }
+
+    .btn-deactivate:hover:not(:disabled) {
+      background: #da190b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-update {
+      background: #2196f3;
+      color: white;
+    }
+
+    .btn-update:hover:not(:disabled) {
+      background: #0b7dda;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .message {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 500;
+      display: none;
+    }
+
+    .message-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .message-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .section-title {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #667eea;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⏰ Timed Shutdown</h1>
+
+    <div class="status-section">
+      <div id="statusIndicator" class="status-indicator status-inactive">INACTIVE</div>
+      <div id="statusInfo" class="status-info">No shutdown scheduled</div>
+    </div>
+
+    <div class="form-group">
+      <label for="shutdownTime">Shutdown Time</label>
+      <input type="time" id="shutdownTime" required>
+    </div>
+
+    <div class="form-group">
+      <label>Days of Week</label>
+      <div class="days-container">
+        <input type="checkbox" id="sunday" class="day-checkbox" value="sunday">
+        <label for="sunday" class="day-label">Sun</label>
+        
+        <input type="checkbox" id="monday" class="day-checkbox" value="monday">
+        <label for="monday" class="day-label">Mon</label>
+        
+        <input type="checkbox" id="tuesday" class="day-checkbox" value="tuesday">
+        <label for="tuesday" class="day-label">Tue</label>
+        
+        <input type="checkbox" id="wednesday" class="day-checkbox" value="wednesday">
+        <label for="wednesday" class="day-label">Wed</label>
+        
+        <input type="checkbox" id="thursday" class="day-checkbox" value="thursday">
+        <label for="thursday" class="day-label">Thu</label>
+        
+        <input type="checkbox" id="friday" class="day-checkbox" value="friday">
+        <label for="friday" class="day-label">Fri</label>
+        
+        <input type="checkbox" id="saturday" class="day-checkbox" value="saturday">
+        <label for="saturday" class="day-label">Sat</label>
+      </div>
+    </div>
+
+    <div class="reminders-section">
+      <div class="section-title">Reminders (Optional)</div>
+      <div class="reminder-input">
+        <input type="time" id="reminder1" placeholder="Reminder 1">
+      </div>
+      <div class="reminder-input">
+        <input type="time" id="reminder2" placeholder="Reminder 2">
+      </div>
+      <div class="reminder-input">
+        <input type="time" id="reminder3" placeholder="Reminder 3">
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button id="activateBtn" class="btn-activate">Activate</button>
+      <button id="updateBtn" class="btn-update" disabled>Update</button>
+      <button id="deactivateBtn" class="btn-deactivate" disabled>Deactivate</button>
+    </div>
+
+    <div id="message" class="message"></div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
+
