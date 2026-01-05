@@ -41,6 +41,7 @@
     "appId": "com.timedshutdown.app",
     "productName": "Timed Shutdown",
     "icon": "assets/icon.png",
+    "publish": null,
     "win": {
       "target": "nsis",
       "icon": "assets/icon.png"
