@@ -6,6 +6,11 @@
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:mac:arm64": "electron-builder --mac --arm64",
+    "build:mac:x64": "electron-builder --mac --x64",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
     "build:all": "electron-builder --win --mac --linux",
     "extract-installers": "bash scripts/extract-installers.sh",
     "release": "bash scripts/upload-release.sh",
