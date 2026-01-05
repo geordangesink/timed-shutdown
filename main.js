@@ -16,7 +16,7 @@ function createWindow(showWindow = true) {
 
   mainWindow = new BrowserWindow({
     width: 600,
-    height: 700,
+    height: 1000,
     show: showWindow, // Don't show window on startup if auto-starting
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
