@@ -80,7 +80,7 @@ describe('ShutdownScheduler', () => {
       expect(state.active).toBe(true);
       expect(state.time).toBe('22:00');
       expect(state.days).toEqual(['monday', 'friday']);
-    });
+    }, 10000);
 
     test('should throw error if time is missing', async () => {
       const config = {

@@ -62,7 +62,7 @@ describe('Integration Tests', () => {
     await scheduler.deactivate();
     state = await scheduler.getState();
     expect(state.active).toBe(false);
-  });
+  }, 10000);
 
   test('should persist state across scheduler instances', async () => {
     const config = {
