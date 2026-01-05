@@ -15,8 +15,8 @@
     "timer",
     "electron"
   ],
-  "author": "",
-  "license": "MIT",
+  "author": "Geordan Gesink",
+  "license": "Apache-2.0",
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "electron": "^28.0.0",
