@@ -67,22 +67,6 @@ jobs:
           rm certificate.p12
         fi
 
-    - name: Import Windows certificate
-      if: matrix.os == 'windows-latest'
-      env:
-        WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
-        WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-      shell: pwsh
-      run: |
-        if ($env:WINDOWS_CERTIFICATE) {
-          $certBytes = [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE)
-          $certPath = "$env:RUNNER_TEMP\certificate.pfx"
-          [System.IO.File]::WriteAllBytes($certPath, $certBytes)
-          $env:CSC_LINK = $certPath
-          $env:CSC_KEY_PASSWORD = $env:WINDOWS_CERTIFICATE_PASSWORD
-          Write-Host "Windows certificate imported"
-        }
-
     - name: Build application (macOS ARM64)
       if: matrix.os == 'macos-latest'
       env:
@@ -104,9 +88,21 @@ jobs:
     - name: Build application (Windows)
       if: matrix.os == 'windows-latest'
       env:
-        CSC_LINK: ${{ env.CSC_LINK }}
-        CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-      run: npm run build
+        WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+        WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+      shell: pwsh
+      run: |
+        if ($env:WINDOWS_CERTIFICATE) {
+          $certBytes = [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE)
+          $certPath = "$env:RUNNER_TEMP\certificate.pfx"
+          [System.IO.File]::WriteAllBytes($certPath, $certBytes)
+          $env:CSC_LINK = $certPath
+          $env:CSC_KEY_PASSWORD = $env:WINDOWS_CERTIFICATE_PASSWORD
+          Write-Host "Windows certificate imported and set"
+        } else {
+          Write-Host "No Windows certificate provided, building without code signing"
+        }
+        npm run build
 
     - name: Build application (Linux)
       if: matrix.os == 'ubuntu-latest'
