@@ -47,7 +47,16 @@ jobs:
     - name: Run tests
       run: npm test
 
-    - name: Build application
+    - name: Build application (macOS ARM64)
+      if: matrix.os == 'macos-latest'
+      run: npm run build -- --mac --arm64
+
+    - name: Build application (macOS Intel x64)
+      if: matrix.os == 'macos-latest'
+      run: npm run build -- --mac --x64
+
+    - name: Build application (other platforms)
+      if: matrix.os != 'macos-latest'
       run: npm run build
 
     - name: Upload Linux artifacts
