@@ -87,6 +87,7 @@ jobs:
         files: dist/*.AppImage
         draft: false
         prerelease: false
+        update: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -97,6 +98,7 @@ jobs:
         files: dist/*.exe
         draft: false
         prerelease: false
+        update: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -107,6 +109,7 @@ jobs:
         files: dist/*.dmg
         draft: false
         prerelease: false
+        update: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
