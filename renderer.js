@@ -1,5 +1,102 @@
 let currentState = { active: false };
 
+// Theme management
+function getSystemTheme() {
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function getStoredTheme() {
+  const stored = localStorage.getItem('theme');
+  // Default to 'system' if nothing is saved
+  return stored || 'system';
+}
+
+function setTheme(theme) {
+  const root = document.documentElement;
+  let actualTheme = theme;
+  
+  if (theme === 'system') {
+    actualTheme = getSystemTheme();
+    // Always persist the theme choice
+    localStorage.setItem('theme', 'system');
+  } else {
+    // Persist explicit theme choice (light or dark)
+    localStorage.setItem('theme', theme);
+  }
+  
+  root.setAttribute('data-theme', actualTheme);
+  updateThemeToggleIcon(theme);
+}
+
+function updateThemeToggleIcon(theme) {
+  const toggle = document.getElementById('themeToggle');
+  if (!toggle) return;
+  
+  const currentTheme = theme === 'system' ? getSystemTheme() : theme;
+  toggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+}
+
+function initTheme() {
+  // Get stored theme, defaulting to 'system' if nothing is saved
+  const storedTheme = getStoredTheme();
+  
+  // If no theme was ever saved, explicitly set and save 'system' as default
+  if (!localStorage.getItem('theme')) {
+    localStorage.setItem('theme', 'system');
+  }
+  
+  // Apply the theme
+  setTheme(storedTheme);
+  
+  // Listen for system theme changes (only if user is using system theme)
+  if (window.matchMedia) {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = (e) => {
+      const stored = getStoredTheme();
+      // Only update if user is using system theme
+      if (stored === 'system') {
+        setTheme('system');
+      }
+    };
+    
+    // Modern browsers
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleSystemThemeChange);
+    } else {
+      // Fallback for older browsers
+      mediaQuery.addListener(handleSystemThemeChange);
+    }
+  }
+}
+
+// Initialize theme on load (after DOM is ready)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initTheme);
+} else {
+  initTheme();
+}
+
+// Theme toggle button - wait for DOM
+document.addEventListener('DOMContentLoaded', () => {
+  const themeToggle = document.getElementById('themeToggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const current = getStoredTheme();
+      let nextTheme;
+      
+      if (current === 'system') {
+        nextTheme = getSystemTheme() === 'dark' ? 'light' : 'dark';
+      } else if (current === 'light') {
+        nextTheme = 'dark';
+      } else {
+        nextTheme = 'light';
+      }
+      
+      setTheme(nextTheme);
+    });
+  }
+});
+
 // DOM elements
 const statusIndicator = document.getElementById('statusIndicator');
 const statusInfo = document.getElementById('statusInfo');

@@ -43,17 +43,14 @@
     "icon": "assets/icon.png",
     "publish": null,
     "win": {
-      "target": "nsis",
-      "icon": "assets/icon.png"
+      "target": "nsis"
     },
     "linux": {
       "target": "AppImage",
-      "icon": "assets/icon.png",
       "category": "Utility"
     },
     "mac": {
       "target": "dmg",
-      "icon": "assets/icon.png",
       "category": "public.app-category.utilities"
     }
   }

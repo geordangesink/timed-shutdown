@@ -5,6 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Timed Shutdown</title>
   <style>
+    :root {
+      /* Light theme colors */
+      --bg-gradient-start: #667eea;
+      --bg-gradient-end: #764ba2;
+      --container-bg: #ffffff;
+      --text-primary: #333333;
+      --text-secondary: #555555;
+      --text-muted: #666666;
+      --border-color: #dddddd;
+      --status-bg: #f5f5f5;
+      --input-bg: #ffffff;
+      --input-border: #dddddd;
+      --shadow: rgba(0, 0, 0, 0.2);
+    }
+
+    [data-theme="dark"] {
+      /* Dark theme colors */
+      --bg-gradient-start: #1a1a2e;
+      --bg-gradient-end: #16213e;
+      --container-bg: #2d2d44;
+      --text-primary: #e0e0e0;
+      --text-secondary: #b0b0b0;
+      --text-muted: #888888;
+      --border-color: #444444;
+      --status-bg: #1e1e2e;
+      --input-bg: #1e1e2e;
+      --input-border: #444444;
+      --shadow: rgba(0, 0, 0, 0.5);
+      --heading-color: #8b9aff;
+      --section-title-color: #8b9aff;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -13,33 +45,65 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #333;
+      background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+      color: var(--text-primary);
       padding: 20px;
       min-height: 100vh;
+      transition: background 0.3s ease;
     }
 
     .container {
       max-width: 550px;
       margin: 0 auto;
-      background: white;
+      background: var(--container-bg);
       border-radius: 15px;
       padding: 30px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 10px 40px var(--shadow);
+      position: relative;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: 2px solid var(--border-color);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: all 0.3s ease;
+      color: var(--text-secondary);
+    }
+
+    .theme-toggle:hover {
+      background: var(--status-bg);
+      transform: rotate(15deg);
     }
 
     h1 {
       text-align: center;
       margin-bottom: 30px;
-      color: #667eea;
+      color: var(--bg-gradient-start);
+      transition: color 0.3s ease;
+    }
+
+    [data-theme="dark"] h1 {
+      color: var(--heading-color, #8b9aff);
     }
 
     .status-section {
-      background: #f5f5f5;
+      background: var(--status-bg);
       padding: 20px;
       border-radius: 10px;
       margin-bottom: 25px;
       text-align: center;
+      transition: background 0.3s ease;
     }
 
     .status-indicator {
@@ -61,9 +125,10 @@
     }
 
     .status-info {
-      color: #666;
+      color: var(--text-muted);
       font-size: 14px;
       margin-top: 10px;
+      transition: color 0.3s ease;
     }
 
     .form-group {
@@ -74,21 +139,38 @@
       display: block;
       margin-bottom: 8px;
       font-weight: 600;
-      color: #555;
+      color: var(--text-secondary);
+      transition: color 0.3s ease;
     }
 
     input[type="time"] {
       width: 100%;
       padding: 12px;
-      border: 2px solid #ddd;
+      border: 2px solid var(--input-border);
       border-radius: 8px;
       font-size: 16px;
-      transition: border-color 0.3s;
+      transition: border-color 0.3s ease, background 0.3s ease, color 0.3s ease;
+      background: var(--input-bg);
+      color: var(--text-primary);
     }
 
     input[type="time"]:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--bg-gradient-start);
+    }
+
+    [data-theme="dark"] input[type="time"]:focus {
+      border-color: var(--heading-color, #8b9aff);
+    }
+
+    [data-theme="dark"] input[type="time"] {
+      color: var(--text-primary);
+      filter: brightness(1.1);
+    }
+
+    [data-theme="dark"] input[type="time"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(1.2);
+      cursor: pointer;
     }
 
     .days-container {
@@ -107,17 +189,19 @@
       min-width: 80px;
       padding: 10px;
       text-align: center;
-      border: 2px solid #ddd;
+      border: 2px solid var(--border-color);
       border-radius: 8px;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.3s ease;
       font-weight: 500;
+      background: var(--input-bg);
+      color: var(--text-primary);
     }
 
     .day-checkbox:checked + .day-label {
-      background: #667eea;
+      background: var(--bg-gradient-start);
       color: white;
-      border-color: #667eea;
+      border-color: var(--bg-gradient-start);
     }
 
     .reminders-section {
@@ -131,9 +215,31 @@
     .reminder-input input {
       width: 100%;
       padding: 10px;
-      border: 2px solid #ddd;
+      border: 2px solid var(--input-border);
       border-radius: 8px;
       font-size: 14px;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      transition: border-color 0.3s ease, background 0.3s ease, color 0.3s ease;
+    }
+
+    .reminder-input input:focus {
+      outline: none;
+      border-color: var(--bg-gradient-start);
+    }
+
+    [data-theme="dark"] .reminder-input input:focus {
+      border-color: var(--heading-color, #8b9aff);
+    }
+
+    [data-theme="dark"] .reminder-input input {
+      color: var(--text-primary);
+      filter: brightness(1.1);
+    }
+
+    [data-theme="dark"] .reminder-input input::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(1.2);
+      cursor: pointer;
     }
 
     .button-group {
@@ -206,23 +312,42 @@
       border: 1px solid #c3e6cb;
     }
 
+    [data-theme="dark"] .message-success {
+      background: #1e4620;
+      color: #81c784;
+      border: 1px solid #2e7d32;
+    }
+
     .message-error {
       background: #f8d7da;
       color: #721c24;
       border: 1px solid #f5c6cb;
     }
 
+    [data-theme="dark"] .message-error {
+      background: #4a1f24;
+      color: #ef5350;
+      border: 1px solid #6a2c32;
+    }
+
     .section-title {
       font-size: 18px;
       margin-bottom: 15px;
-      color: #667eea;
-      border-bottom: 2px solid #667eea;
+      color: var(--bg-gradient-start);
+      border-bottom: 2px solid var(--bg-gradient-start);
       padding-bottom: 5px;
+      transition: color 0.3s ease, border-color 0.3s ease;
+    }
+
+    [data-theme="dark"] .section-title {
+      color: var(--section-title-color, #8b9aff);
+      border-bottom-color: var(--section-title-color, #8b9aff);
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌓</button>
     <h1>⏰ Timed Shutdown</h1>
 
     <div class="status-section">
