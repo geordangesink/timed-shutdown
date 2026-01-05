@@ -1,0 +1,145 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers on tags like v1.0.2
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build application
+        run: npm run build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Prepare installers for upload
+        shell: bash
+        run: |
+          cd dist
+          # Create a clean artifacts directory
+          mkdir -p ../artifacts
+          
+          # First, extract installers from zip files if they exist
+          for zip in *.zip; do
+            if [ -f "$zip" ]; then
+              echo "📦 Extracting installers from $zip..."
+              TEMP_DIR=$(mktemp -d)
+              unzip -q "$zip" -d "$TEMP_DIR" || true
+              # Find and copy installers from extracted zip
+              find "$TEMP_DIR" -type f \( \
+                -name "*.exe" -o \
+                -name "*.dmg" -o \
+                -name "*.pkg" -o \
+                -name "*.AppImage" -o \
+                -name "*.deb" -o \
+                -name "*.rpm" \
+              \) -exec cp {} ../artifacts/ \;
+              rm -rf "$TEMP_DIR"
+            fi
+          done
+          
+          # Copy direct installers (not in zip files)
+          echo "📋 Copying direct installers..."
+          # Windows
+          if ls *.exe 1> /dev/null 2>&1; then
+            cp *.exe ../artifacts/ 2>/dev/null || true
+          fi
+          
+          # macOS
+          if ls *.dmg 1> /dev/null 2>&1; then
+            cp *.dmg ../artifacts/ 2>/dev/null || true
+          fi
+          if ls *.pkg 1> /dev/null 2>&1; then
+            cp *.pkg ../artifacts/ 2>/dev/null || true
+          fi
+          
+          # Linux
+          if ls *.AppImage 1> /dev/null 2>&1; then
+            cp *.AppImage ../artifacts/ 2>/dev/null || true
+          fi
+          if ls *.deb 1> /dev/null 2>&1; then
+            cp *.deb ../artifacts/ 2>/dev/null || true
+          fi
+          if ls *.rpm 1> /dev/null 2>&1; then
+            cp *.rpm ../artifacts/ 2>/dev/null || true
+          fi
+          
+          cd ..
+          echo "✅ Installers ready:"
+          ls -lh artifacts/
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: installers-${{ matrix.os }}
+          path: artifacts/*
+          if-no-files-found: warn
+          retention-days: 1
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-artifacts
+          pattern: installers-*
+          merge-multiple: true
+      
+      - name: Get version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Tag version: v$VERSION"
+      
+      - name: List artifacts
+        run: |
+          echo "Artifacts to upload:"
+          find all-artifacts -type f -exec ls -lh {} \;
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          name: Release ${{ steps.get_version.outputs.version }}
+          body: |
+            ## Timed Shutdown ${{ steps.get_version.outputs.version }}
+            
+            ### Downloads
+            
+            Installers for all platforms are available below.
+            
+            ### Changes
+            
+            See the commit history for changes in this release.
+          files: |
+            all-artifacts/*
+          draft: false
+          prerelease: false
+
