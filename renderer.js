@@ -33,7 +33,22 @@ function updateThemeToggleIcon(theme) {
   if (!toggle) return;
   
   const currentTheme = theme === 'system' ? getSystemTheme() : theme;
-  toggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+  const svg = toggle.querySelector('svg');
+  if (!svg) return;
+  
+  // Update SVG based on theme - show moon for light mode, sun for dark mode
+  if (currentTheme === 'dark') {
+    // Show sun icon (light mode icon, since clicking will switch to light)
+    svg.innerHTML = `
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+    `;
+  } else {
+    // Show moon icon (dark mode icon, since clicking will switch to dark)
+    svg.innerHTML = `
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    `;
+  }
 }
 
 function initTheme() {

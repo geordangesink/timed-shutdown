@@ -23,7 +23,8 @@ function createWindow(showWindow = true) {
       nodeIntegration: false,
       contextIsolation: true
     },
-    icon: path.join(__dirname, 'assets', 'icon.png')
+    icon: path.join(__dirname, 'assets', 'icon.png'),
+    title: 'Timed Shutdown'
   });
 
   mainWindow.loadFile('index.html');
@@ -88,13 +89,33 @@ function createTray() {
   try {
     trayIcon = nativeImage.createFromPath(iconPath);
   } catch (e) {
-    // Create a simple icon if file doesn't exist
-    trayIcon = nativeImage.createEmpty();
+    // Fallback: try using the main icon
+    try {
+      trayIcon = nativeImage.createFromPath(path.join(__dirname, 'assets', 'icon.png'));
+    } catch (e2) {
+      // Create a simple icon if file doesn't exist
+      trayIcon = nativeImage.createEmpty();
+    }
   }
 
   if (trayIcon.isEmpty()) {
-    // Create a simple colored icon
+    // Create a simple colored icon as last resort
     trayIcon = nativeImage.createFromDataURL('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+  }
+
+  // Resize tray icon for uniform size across platforms
+  if (process.platform === 'darwin') {
+    // macOS tray icons should be exactly 22x22 pixels for uniform size
+    // macOS will automatically handle Retina scaling (@2x = 44x44)
+    trayIcon = trayIcon.resize({ width: 22, height: 22 });
+    // Set as template image for macOS (allows system to apply proper styling)
+    trayIcon.setTemplateImage(true);
+  } else if (process.platform === 'win32') {
+    // Windows tray icons are typically 16x16 or 32x32
+    trayIcon = trayIcon.resize({ width: 32, height: 32 });
+  } else {
+    // Linux tray icons vary, but 32x32 is a good default
+    trayIcon = trayIcon.resize({ width: 32, height: 32 });
   }
 
   tray = new Tray(trayIcon);

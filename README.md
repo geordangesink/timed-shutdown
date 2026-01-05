@@ -51,6 +51,64 @@ Download the latest release for your platform:
    ```
    The built application will be in the `dist/` directory.
 
+### Code Signing
+
+Code signing is recommended for distribution to avoid security warnings for users.
+
+#### macOS
+
+Code signing is **required** for macOS distribution. To set up:
+
+1. **Get a Developer ID certificate** from Apple Developer (required for distribution outside the App Store)
+
+2. **Set environment variables** before building:
+   ```bash
+   # Your Developer ID certificate name (find it in Keychain Access)
+   export CSC_NAME="Developer ID Application: Your Name (TEAM_ID)"
+   
+   # For notarization (required for distribution)
+   export APPLE_ID="your-apple-id@example.com"
+   export APPLE_ID_PASSWORD="app-specific-password"  # Generate at appleid.apple.com
+   export APPLE_TEAM_ID="YOUR_TEAM_ID"
+   ```
+
+3. **Build with signing**:
+   ```bash
+   npm run build
+   ```
+
+**Note**: Without code signing, macOS users will see a warning about the app being from an unidentified developer. Distribution requires proper signing and notarization.
+
+#### Windows
+
+Code signing is **highly recommended** for Windows to avoid "Unknown publisher" warnings from Windows Defender SmartScreen.
+
+1. **Get a code signing certificate** from a trusted Certificate Authority (e.g., DigiCert, Sectigo, GlobalSign)
+
+2. **Set environment variables** before building:
+   ```bash
+   # Path to your .pfx certificate file
+   export CSC_LINK="/path/to/certificate.pfx"
+   export CSC_KEY_PASSWORD="your-certificate-password"
+   ```
+
+   Or use base64-encoded certificate:
+   ```bash
+   export CSC_LINK="base64-encoded-certificate-string"
+   export CSC_KEY_PASSWORD="your-certificate-password"
+   ```
+
+3. **Build with signing**:
+   ```bash
+   npm run build
+   ```
+
+**Note**: Without code signing, Windows users will see security warnings. For distribution, code signing is strongly recommended.
+
+#### Linux
+
+Code signing is **not required** for Linux AppImage builds. AppImages are typically distributed without code signing, though some distributions may use GPG signing for package repositories.
+
 ## 📖 Usage
 
 ### Setting Up a Shutdown Schedule
