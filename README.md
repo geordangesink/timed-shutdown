@@ -1,15 +1,13 @@
 # ⏰ Timed Shutdown
 
-A beautiful, cross-platform desktop application for scheduling automatic system shutdowns at specific times. Built with Electron, featuring a modern UI and system tray integration.
+A cross-platform desktop application for scheduling automatic system shutdowns at specific times. Built with Electron, featuring a minimalistic UI and system tray integration.
 
 ## ✨ Features
 
 - **🕐 Scheduled Shutdowns**: Set automatic shutdown times for specific days of the week
 - **🔔 Reminders**: Configure up to 3 reminder notifications before shutdown
 - **🔄 Auto-Start**: Automatically launches on system startup (runs in background)
-- **📱 System Tray**: Runs quietly in the system tray with quick access
 - **💾 State Persistence**: Remembers your schedule across app restarts
-- **🎨 Modern UI**: Beautiful gradient interface with intuitive controls
 - **🌍 Cross-Platform**: Works on Windows, Linux, and macOS
 
 ## 📸 Overview
@@ -101,20 +99,6 @@ npm run test:coverage
 - **Scheduling**: node-cron for cross-platform cron-like scheduling
 - **State Management**: JSON-based persistence in user data directory
 - **Platform Detection**: Automatic detection and platform-specific implementations
-
-### Project Structure
-
-```
-timed-shutdown/
-├── main.js              # Main Electron process
-├── preload.js           # Preload script for secure IPC
-├── renderer.js          # Renderer process logic
-├── shutdown-scheduler.js # Core scheduling functionality
-├── auto-start.js        # Auto-start implementation
-├── index.html           # UI markup
-├── assets/              # Icons and images
-└── __tests__/           # Test files
-```
 
 ### Platform-Specific Features
 
